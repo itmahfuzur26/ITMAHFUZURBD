@@ -7,6 +7,7 @@ interface InstructorAvatarProps {
   showMrmBadge?: boolean;
   className?: string;
   onClick?: () => void;
+  photoUrl?: string;
 }
 
 export const InstructorAvatar: React.FC<InstructorAvatarProps> = ({
@@ -15,8 +16,9 @@ export const InstructorAvatar: React.FC<InstructorAvatarProps> = ({
   showMrmBadge = true,
   className = '',
   onClick,
+  photoUrl,
 }) => {
-  const photoUrl = 'https://res.cloudinary.com/ru3hghyn/image/upload/v1793028848/1000030687-removebg-preview.png';
+  const imageSrc = photoUrl || 'https://res.cloudinary.com/ru3hghyn/image/upload/v1793028848/1000030687-removebg-preview.png';
 
   const sizeClasses = {
     sm: 'w-10 h-10',
@@ -51,7 +53,7 @@ export const InstructorAvatar: React.FC<InstructorAvatarProps> = ({
 
           {/* Instructor Transparent Image */}
           <img
-            src={photoUrl}
+            src={imageSrc}
             alt="Mahfuzur Rahman Mahdi (MRM)"
             className="w-full h-full object-cover object-top scale-105 group-hover:scale-110 transition duration-500 relative z-10"
             loading="eager"

@@ -22,6 +22,14 @@ interface InstructorPageProps {
 
 export const InstructorPage: React.FC<InstructorPageProps> = ({ navigate }) => {
   const { language, t } = useLanguage();
+  const [settings, setSettings] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    fetch('/api/admin/settings')
+      .then(res => res.json())
+      .then(data => setSettings(data))
+      .catch(() => {});
+  }, []);
 
   const expertiseList = [
     { title_bn: 'গ্রাফিক ডিজাইন (Graphic Design)', title_en: 'Graphic Design', desc_bn: 'ফটোশপ ও ইলাস্ট্রেটরে ব্র্যান্ড আইডেন্টিটি, প্রিন্ট ও ডিজিটাল মিডিয়া', desc_en: 'Brand identity, print design, and social media artwork with Photoshop & Illustrator' },
@@ -40,7 +48,12 @@ export const InstructorPage: React.FC<InstructorPageProps> = ({ navigate }) => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             {/* Visual Avatar Monogram */}
             <div className="lg:col-span-4 flex flex-col items-center text-center">
-              <InstructorAvatar size="xl" showExperienceBadge={true} showMrmBadge={true} />
+              <InstructorAvatar
+                size="xl"
+                showExperienceBadge={true}
+                showMrmBadge={true}
+                photoUrl={settings?.instructor_photo_url}
+              />
             </div>
 
             {/* Info */}

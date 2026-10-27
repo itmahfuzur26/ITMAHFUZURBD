@@ -12,6 +12,7 @@ export const ContactPage: React.FC = () => {
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [settings, setSettings] = useState<{
     phone?: string;
     email?: string;

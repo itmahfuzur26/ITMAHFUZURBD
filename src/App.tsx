@@ -106,8 +106,18 @@ function AppContent() {
       return <ForgotPasswordPage navigate={navigate} />;
     }
 
-    // 9. Protected Student routes
-    if (currentPath === '/dashboard' || currentPath === '/my-courses') {
+    // 9. Protected Dashboard & Student routes
+    if (currentPath === '/dashboard') {
+      if (!isLoggedIn) {
+        return <LoginPage navigate={navigate} />;
+      }
+      if (isAdmin) {
+        return <AdminDashboardPage navigate={navigate} />;
+      }
+      return <StudentDashboardPage navigate={navigate} />;
+    }
+
+    if (currentPath === '/student-dashboard' || currentPath === '/my-courses') {
       if (!isLoggedIn) {
         return <LoginPage navigate={navigate} />;
       }
@@ -146,6 +156,24 @@ function AppContent() {
     if (currentPath === '/admin') {
       if (!isLoggedIn) {
         return <LoginPage navigate={navigate} />;
+      }
+      if (!isAdmin) {
+        return (
+          <div className="min-h-[70vh] flex items-center justify-center px-4">
+            <div className="max-w-md p-8 rounded-3xl bg-slate-900 border border-red-500/30 text-center space-y-4">
+              <h3 className="text-xl font-bold text-white">অননুমোদিত প্রবেশাধিকার (Access Denied)</h3>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                এই ড্যাশবোর্ডটি শুধুমাত্র ITMahfuzur এর অনুমোদিত অ্যাডমিনের জন্য সংরক্ষিত। আপনার অ্যাকাউন্টে অ্যাডমিন পারমিশন নেই।
+              </p>
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="px-6 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs cursor-pointer"
+              >
+                শিক্ষার্থী ড্যাশবোর্ডে ফিরে যান
+              </button>
+            </div>
+          </div>
+        );
       }
       return <AdminDashboardPage navigate={navigate} />;
     }

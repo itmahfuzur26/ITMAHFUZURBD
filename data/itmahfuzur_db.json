@@ -8,7 +8,8 @@
       "role": "admin",
       "phone": "01762-766261",
       "bio": "আইটি ট্রেইনার ও ফাউন্ডার - ITMahfuzur। গ্রাফিক ডিজাইন, এআই ও ডিজিটাল স্কিলস বিশেষজ্ঞ (২০১৮ থেকে)।",
-      "createdAt": "2026-10-26T13:33:31.619Z"
+      "createdAt": "2026-10-26T13:33:31.619Z",
+      "avatar": "https://res.cloudinary.com/ru3hghyn/image/upload/v1793028848/1000030687-removebg-preview.png"
     },
     {
       "id": "user_student_tanvir",
@@ -572,6 +573,7 @@
     "facebook_page": "https://www.facebook.com/share/1G1riLzDqa/",
     "facebook_group": "https://www.facebook.com/groups/518193848887774/?ref=share&mibextid=NSMWBT",
     "tagline_bn": "ITMahfuzur — অভিজ্ঞতার আলোকে প্রযুক্তি শিক্ষা, দক্ষতা উন্নয়নে আপনার বিশ্বস্ত সঙ্গী।",
-    "tagline_en": "ITMahfuzur — Technology Education Built on Experience, Your Partner in Skill Development."
+    "tagline_en": "ITMahfuzur — Technology Education Built on Experience, Your Partner in Skill Development.",
+    "instructor_photo_url": "https://res.cloudinary.com/ru3hghyn/image/upload/v1793028848/1000030687-removebg-preview.png"
   }
 }

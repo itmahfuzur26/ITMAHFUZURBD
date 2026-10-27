@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { Logo } from '../components/Logo';
-import { Mail, CheckCircle2, ArrowLeft, MessageSquare, Copy, Check, LogIn, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Mail, CheckCircle2, ArrowLeft, MessageSquare, Copy, Check, LogIn, AlertCircle } from 'lucide-react';
 
 interface ForgotPasswordPageProps {
   navigate: (path: string) => void;
@@ -194,7 +194,7 @@ export const ForgotPasswordPage: React.FC<ForgotPasswordPageProps> = ({ navigate
                   <input
                     type="email"
                     required
-                    placeholder="itmahfuzur@gmail.com"
+                    placeholder="name@example.com"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:border-cyan-500 focus:outline-none"
@@ -206,16 +206,6 @@ export const ForgotPasswordPage: React.FC<ForgotPasswordPageProps> = ({ navigate
                     : 'A new recovery password will be dispatched to your registered email address.'}
                 </p>
               </div>
-
-              {/* Quick Fill Suggestion for Admin */}
-              <button
-                type="button"
-                onClick={() => setEmail('itmahfuzur@gmail.com')}
-                className="w-full py-1.5 px-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 text-amber-300 text-[11px] text-left transition flex items-center justify-between"
-              >
-                <span>{language === 'bn' ? 'অ্যাডমিন ইমেইল পূরণ করুন:' : 'Fill Admin Email:'}</span>
-                <span className="font-mono font-semibold">itmahfuzur@gmail.com</span>
-              </button>
 
               <button
                 type="submit"

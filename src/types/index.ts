@@ -7,6 +7,7 @@ export interface User {
   role: 'student' | 'admin';
   phone?: string;
   bio?: string;
+  avatar?: string;
 }
 
 export interface Course {
@@ -154,4 +155,16 @@ export interface SiteSettings {
   tagline_en: string;
   instructor_bio_bn?: string;
   instructor_bio_en?: string;
+  hero_headline_bn?: string;
+  hero_headline_en?: string;
+  hero_subheadline_bn?: string;
+  hero_subheadline_en?: string;
+  notice_enabled?: boolean;
+  notice_text_bn?: string;
+  notice_text_en?: string;
+  full_course_price?: number;
+  full_course_discount_price?: number;
+  bundle_offer_enabled?: boolean;
+  bundle_title_bn?: string;
+  bundle_title_en?: string;
 }

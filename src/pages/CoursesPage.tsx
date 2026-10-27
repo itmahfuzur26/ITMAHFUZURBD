@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
-import { Course } from '../types';
+import { Course, SiteSettings } from '../types';
 import { BkashPaymentModal } from '../components/BkashPaymentModal';
-import { Search, Filter, Clock, Video, BookOpen, ArrowRight, CreditCard } from 'lucide-react';
+import { Search, Filter, Clock, Video, BookOpen, ArrowRight, CreditCard, Lock, Unlock, Sparkles } from 'lucide-react';
 
 interface CoursesPageProps {
   navigate: (path: string) => void;
@@ -14,6 +14,7 @@ export const CoursesPage: React.FC<CoursesPageProps> = ({ navigate, initialCateg
   const { language, t } = useLanguage();
   const { isLoggedIn, fetchWithAuth } = useAuth();
   const [courses, setCourses] = useState<Course[]>([]);
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory || 'all');
   const [selectedPriceType, setSelectedPriceType] = useState<string>('all');
@@ -22,7 +23,11 @@ export const CoursesPage: React.FC<CoursesPageProps> = ({ navigate, initialCateg
 
   useEffect(() => {
     fetchCourses();
-  }, [selectedCategory, searchQuery]);
+    fetch('/api/admin/settings')
+      .then(res => res.json())
+      .then(data => setSettings(data))
+      .catch(() => {});
+  }, [selectedCategory, searchQuery, isLoggedIn]);
 
   const fetchCourses = () => {
     setLoading(true);
@@ -34,7 +39,7 @@ export const CoursesPage: React.FC<CoursesPageProps> = ({ navigate, initialCateg
       params.append('search', searchQuery.trim());
     }
 
-    fetch(`/api/courses?${params.toString()}`)
+    fetchWithAuth(`/api/courses?${params.toString()}`)
       .then(res => res.json())
       .then(data => setCourses(data))
       .catch(() => {})
@@ -73,6 +78,65 @@ export const CoursesPage: React.FC<CoursesPageProps> = ({ navigate, initialCateg
               : 'Learn with step-by-step practical workflows, project files, and direct instructor guidance.'}
           </p>
         </div>
+
+        {/* Full Course / Bundle Offer Banner if enabled */}
+        {settings?.bundle_offer_enabled && (
+          <div className="p-6 sm:p-7 rounded-3xl bg-gradient-to-r from-cyan-950/70 via-slate-900 to-indigo-950/70 border border-cyan-500/30 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-2xl">
+            <div className="space-y-1.5 max-w-2xl">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-bold">
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                <span>{language === 'bn' ? 'ফুল কোর্স অল-ইন-ওয়ান প্যাকেজ' : 'All-in-One Full Course Bundle'}</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-white">
+                {language === 'bn'
+                  ? (settings.bundle_title_bn || 'ফুল কোর্স অল-ইন-ওয়ান স্পেশাল প্যাক (সব কোর্স একসাথে)')
+                  : (settings.bundle_title_en || 'All-in-One Full Course Master Bundle')}
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                {language === 'bn'
+                  ? 'গ্রাফিক ডিজাইন, এআই টুলস ও ডিজিটাল মার্কেটিং এর সকল কোর্স এককালীন বিকাশ পেমেন্টে আজীবন অ্যাক্সেস করুন।'
+                  : 'Get complete access to Graphic Design, AI Tools, and Digital Marketing with mentor support.'}
+              </p>
+            </div>
+
+            <div className="flex flex-row md:flex-col lg:flex-row items-center gap-4 w-full md:w-auto justify-between md:justify-end">
+              <div className="text-left md:text-right">
+                {settings.full_course_discount_price && settings.full_course_price && settings.full_course_discount_price < settings.full_course_price && (
+                  <div className="text-xs text-slate-400 line-through">
+                    ৳{settings.full_course_price.toLocaleString()} BDT
+                  </div>
+                )}
+                <div className="text-2xl font-black text-cyan-400">
+                  ৳{(settings.full_course_discount_price || settings.full_course_price || 3500).toLocaleString()} BDT
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (!isLoggedIn) {
+                    navigate('/login');
+                  } else {
+                    const sampleCourse = courses.find(c => !c.isFree) || courses[0];
+                    if (sampleCourse) {
+                      setSelectedCourseForBkash({
+                        ...sampleCourse,
+                        id: sampleCourse.id,
+                        price: settings.full_course_discount_price || settings.full_course_price || 3500,
+                        title_bn: settings.bundle_title_bn || 'ফুল কোর্স অল-ইন-ওয়ান স্পেশাল প্যাক',
+                        title_en: settings.bundle_title_en || 'Full Course Master Bundle',
+                      });
+                    }
+                  }
+                }}
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-pink-600/30 transition whitespace-nowrap cursor-pointer transform active:scale-95"
+              >
+                <CreditCard className="w-4 h-4" />
+                <span>{language === 'bn' ? 'ফুল কোর্স কিনুন (বিকাশ)' : 'Enroll in Full Bundle'}</span>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Filter & Search Bar */}
         <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl mb-8 space-y-4">
@@ -188,11 +252,17 @@ export const CoursesPage: React.FC<CoursesPageProps> = ({ navigate, initialCateg
                       </span>
                     </div>
 
+                    {!course.hasAccess && !course.isFree && (
+                      <div className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-950/90 backdrop-blur-md border border-amber-500/50 text-amber-300 text-xs font-bold shadow-lg">
+                        <Lock className="w-3.5 h-3.5 text-amber-400" />
+                        <span>{language === 'bn' ? 'লক করা' : 'Locked'}</span>
+                      </div>
+                    )}
+
                     {course.hasAccess && (
-                      <div className="absolute top-3 right-3">
-                        <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/90 text-slate-950 shadow-md">
-                          {language === 'bn' ? 'এনরোল্ড ✓' : 'Enrolled ✓'}
-                        </span>
+                      <div className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500 text-slate-950 text-xs font-bold shadow-lg">
+                        <Unlock className="w-3.5 h-3.5 text-slate-950" />
+                        <span>{language === 'bn' ? 'আনলকড ✓' : 'Unlocked ✓'}</span>
                       </div>
                     )}
                   </div>
@@ -244,7 +314,8 @@ export const CoursesPage: React.FC<CoursesPageProps> = ({ navigate, initialCateg
                       onClick={() => navigate(`/courses/${course.id}`)}
                       className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg transition"
                     >
-                      <span>{language === 'bn' ? 'ক্লাস শুরু করুন' : 'Start Learning'}</span>
+                      <Unlock className="w-3.5 h-3.5" />
+                      <span>{language === 'bn' ? 'ক্লাস শুরু করুন (আনলকড)' : 'Start Learning'}</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   ) : course.isFree ? (
@@ -261,9 +332,10 @@ export const CoursesPage: React.FC<CoursesPageProps> = ({ navigate, initialCateg
                       <button
                         type="button"
                         onClick={() => navigate(`/courses/${course.id}`)}
-                        className="py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs transition text-center"
+                        className="py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center gap-1.5 transition text-center"
                       >
-                        {language === 'bn' ? 'কোর্স সিলেবাস' : 'Curriculum'}
+                        <Lock className="w-3.5 h-3.5 text-amber-400" />
+                        <span>{language === 'bn' ? 'সিলেবাস (লকড)' : 'Curriculum'}</span>
                       </button>
                       <button
                         type="button"
@@ -277,7 +349,7 @@ export const CoursesPage: React.FC<CoursesPageProps> = ({ navigate, initialCateg
                         className="py-2.5 rounded-xl bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-pink-600/30 transition"
                       >
                         <CreditCard className="w-3.5 h-3.5" />
-                        <span>{language === 'bn' ? 'bKash এ পেমেন্ট' : 'Pay bKash'}</span>
+                        <span>{language === 'bn' ? 'কোর্স কিনুন' : 'Pay bKash'}</span>
                       </button>
                     </div>
                   )}

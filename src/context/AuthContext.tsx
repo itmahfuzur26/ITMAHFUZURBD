@@ -7,7 +7,7 @@ interface AuthContextType {
   loading: boolean;
   isAdmin: boolean;
   isLoggedIn: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  login: (email: string, password: string) => Promise<{ success: boolean; user?: User; error?: string }>;
   register: (name: string, email: string, password: string, phone?: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   updateProfile: (data: Partial<User> & { currentPassword?: string; newPassword?: string }) => Promise<{ success: boolean; error?: string }>;
@@ -61,7 +61,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
   }, [token]);
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  const login = async (email: string, password: string): Promise<{ success: boolean; user?: User; error?: string }> => {
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
@@ -76,7 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('itmahfuzur_token', data.token);
       setToken(data.token);
       setUser(data.user);
-      return { success: true };
+      return { success: true, user: data.user };
     } catch (err: any) {
       console.error('Login request failed:', err);
       return { success: false, error: 'সার্ভারের সাথে সংযোগ করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন বা অন্য ব্রাউজারে রিলোড দিন।' };

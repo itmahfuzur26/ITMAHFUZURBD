@@ -23,7 +23,9 @@ import {
   ChevronDown,
   CreditCard,
   Users,
-  ExternalLink
+  ExternalLink,
+  Lock,
+  Unlock
 } from 'lucide-react';
 
 interface HomePageProps {
@@ -129,6 +131,16 @@ export const HomePage: React.FC<HomePageProps> = ({ navigate }) => {
 
   return (
     <div className="min-h-screen text-slate-100 pb-20">
+      {/* Dynamic Announcement / Notice Bar (Controlled by Admin CMS) */}
+      {settings?.notice_enabled && (settings?.notice_text_bn || settings?.notice_text_en) && (
+        <div className="bg-gradient-to-r from-cyan-950/90 via-blue-950/90 to-slate-950 border-b border-cyan-800/40 py-2.5 px-4 text-center text-xs sm:text-sm text-cyan-200 flex items-center justify-center gap-2">
+          <Sparkles className="w-4 h-4 text-cyan-400 shrink-0 animate-pulse" />
+          <span className="font-medium">
+            {language === 'bn' ? settings?.notice_text_bn : settings?.notice_text_en}
+          </span>
+        </div>
+      )}
+
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28">
         {/* Ambient background glows */}
@@ -153,7 +165,7 @@ export const HomePage: React.FC<HomePageProps> = ({ navigate }) => {
                   <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-500 p-0.5 shadow-md shadow-cyan-400/30">
                     <div className="w-full h-full rounded-full bg-slate-950 overflow-hidden flex items-center justify-center">
                       <img
-                        src="https://res.cloudinary.com/ru3hghyn/image/upload/v1793028848/1000030687-removebg-preview.png"
+                        src={settings?.instructor_photo_url || "https://res.cloudinary.com/ru3hghyn/image/upload/v1793028848/1000030687-removebg-preview.png"}
                         alt="Mahfuzur Rahman Mahdi (MRM)"
                         className="w-full h-full object-cover object-top scale-110 group-hover:scale-125 transition duration-300"
                       />
@@ -166,12 +178,12 @@ export const HomePage: React.FC<HomePageProps> = ({ navigate }) => {
                 <div className="text-left">
                   <div className="flex items-center gap-1">
                     <span className="text-xs font-bold text-white group-hover:text-cyan-300 transition">
-                      {language === 'bn' ? 'মাহফুজুর রহমান মাহদী' : 'Mahfuzur Rahman Mahdi'}
+                      {settings?.instructor_name || (language === 'bn' ? 'মাহফুজুর রহমান মাহদী' : 'Mahfuzur Rahman Mahdi')}
                     </span>
                     <CheckCircle2 className="w-3 h-3 text-cyan-400 fill-cyan-400/20" />
                   </div>
                   <span className="text-[10px] text-cyan-400 font-medium">
-                    {language === 'bn' ? 'প্রতিষ্ঠাতা ও প্রশিক্ষক • ২০১৮ থেকে' : 'Founder & Mentor • Since 2018'}
+                    {language === 'bn' ? `প্রতিষ্ঠাতা ও প্রশিক্ষক • ${settings?.experience_since || '২০১৮'} থেকে` : `Founder & Mentor • Since ${settings?.experience_since || '2018'}`}
                   </span>
                 </div>
               </div>
@@ -180,21 +192,29 @@ export const HomePage: React.FC<HomePageProps> = ({ navigate }) => {
             {/* Main Headline */}
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
               {language === 'bn' ? (
-                <>
-                  অভিজ্ঞতার আলোকে <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-400">প্রযুক্তি শিক্ষা</span> ও দক্ষতা উন্নয়ন
-                </>
+                settings?.hero_headline_bn ? (
+                  settings.hero_headline_bn
+                ) : (
+                  <>
+                    অভিজ্ঞতার আলোকে <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-400">প্রযুক্তি শিক্ষা</span> ও দক্ষতা উন্নয়ন
+                  </>
+                )
               ) : (
-                <>
-                  Practical <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-400">Technology Education</span> Built on Real Experience
-                </>
+                settings?.hero_headline_en ? (
+                  settings.hero_headline_en
+                ) : (
+                  <>
+                    Practical <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-400">Technology Education</span> Built on Real Experience
+                  </>
+                )
               )}
             </h1>
 
             {/* Tagline & Subtitle */}
             <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
               {language === 'bn'
-                ? 'আইটি মাহফুজুর (ITMahfuzur) এ গ্রাফিক ডিজাইন, আধুনিক AI টুলস, প্রম্পট ইঞ্জিনিয়ারিং এবং ডিজিটাল মার্কেটিং শিখুন সরাসরি ২০১৮ সাল থেকে বাস্তব ক্ষেত্রে কর্মরত প্রফেশনালের তত্ত্বাবধানে।'
-                : 'Learn Graphic Design, Modern AI Tools, Prompt Engineering, and Digital Marketing guided directly by Mahfuzur Rahman Mahdi, in the IT industry since 2018.'}
+                ? (settings?.hero_subheadline_bn || 'আইটি মাহফুজুর (ITMahfuzur) এ গ্রাফিক ডিজাইন, আধুনিক AI টুলস, প্রম্পট ইঞ্জিনিয়ারিং এবং ডিজিটাল মার্কেটিং শিখুন সরাসরি ২০১৮ সাল থেকে বাস্তব ক্ষেত্রে কর্মরত প্রফেশনালের তত্ত্বাবধানে।')
+                : (settings?.hero_subheadline_en || 'Learn Graphic Design, Modern AI Tools, Prompt Engineering, and Digital Marketing guided directly by Mahfuzur Rahman Mahdi, in the IT industry since 2018.')}
             </p>
 
             {/* CTA Buttons */}
@@ -362,6 +382,20 @@ export const HomePage: React.FC<HomePageProps> = ({ navigate }) => {
                           {course.isFree ? t('courseFree') : `৳${course.price.toLocaleString()} BDT`}
                         </span>
                       </div>
+
+                      {!course.hasAccess && !course.isFree && (
+                        <div className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-950/90 backdrop-blur-md border border-amber-500/50 text-amber-300 text-xs font-bold shadow-lg">
+                          <Lock className="w-3.5 h-3.5 text-amber-400" />
+                          <span>{language === 'bn' ? 'লক করা' : 'Locked'}</span>
+                        </div>
+                      )}
+
+                      {course.hasAccess && (
+                        <div className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500 text-slate-950 text-xs font-bold shadow-lg">
+                          <Unlock className="w-3.5 h-3.5 text-slate-950" />
+                          <span>{language === 'bn' ? 'আনলকড ✓' : 'Unlocked ✓'}</span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Content */}
@@ -404,10 +438,10 @@ export const HomePage: React.FC<HomePageProps> = ({ navigate }) => {
                             e.stopPropagation();
                             navigate(`/courses/${course.id}/learn`);
                           }}
-                          className="w-full py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition"
+                          className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 transition"
                         >
-                          <BookOpen className="w-3.5 h-3.5" />
-                          <span>{language === 'bn' ? 'শেখা শুরু করুন' : 'Continue Learning'}</span>
+                          <Unlock className="w-3.5 h-3.5" />
+                          <span>{language === 'bn' ? 'ক্লাস শুরু করুন (আনলকড)' : 'Start Learning'}</span>
                         </button>
                       ) : !course.isFree ? (
                         <div className="w-full grid grid-cols-2 gap-2">
@@ -424,7 +458,7 @@ export const HomePage: React.FC<HomePageProps> = ({ navigate }) => {
                             className="py-2.5 rounded-xl bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-bold text-xs flex items-center justify-center gap-1 shadow-md shadow-pink-600/20 transition"
                           >
                             <CreditCard className="w-3.5 h-3.5" />
-                            <span>{language === 'bn' ? 'bKash এ পেমেন্ট' : 'bKash Pay'}</span>
+                            <span>{language === 'bn' ? 'কোর্স কিনুন' : 'Pay bKash'}</span>
                           </button>
                           <button
                             type="button"
@@ -432,8 +466,9 @@ export const HomePage: React.FC<HomePageProps> = ({ navigate }) => {
                               e.stopPropagation();
                               navigate(`/courses/${course.id}`);
                             }}
-                            className="py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs transition"
+                            className="py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs flex items-center justify-center gap-1 transition"
                           >
+                            <Lock className="w-3 h-3 text-amber-400" />
                             <span>{language === 'bn' ? 'বিস্তারিত' : 'Details'}</span>
                           </button>
                         </div>

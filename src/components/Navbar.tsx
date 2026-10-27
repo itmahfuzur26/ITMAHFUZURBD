@@ -93,80 +93,120 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, navigate }) => {
 
             {/* Auth Controls */}
             {isLoggedIn ? (
-              <div className="relative">
-                <button
-                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-sm font-medium text-white transition"
-                >
-                  <div className="w-7 h-7 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 flex items-center justify-center font-bold text-xs">
-                    {user?.name?.charAt(0).toUpperCase()}
-                  </div>
-                  <span className="max-w-[120px] truncate">{user?.name}</span>
-                  {isAdmin && (
-                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                      ADMIN
-                    </span>
-                  )}
-                  <ChevronDown className="w-4 h-4 text-slate-400" />
-                </button>
+              <div className="flex items-center gap-2">
+                {isAdmin && (
+                  <button
+                    onClick={() => handleNav('/admin')}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold transition shadow-md shadow-amber-500/10 cursor-pointer"
+                  >
+                    <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
+                    <span>{language === 'bn' ? 'অ্যাডমিন প্যানেল' : 'Admin Panel'}</span>
+                  </button>
+                )}
 
-                {/* Dropdown Menu */}
-                {userDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl py-2 z-50 animate-fade-in text-sm text-slate-200">
-                    <div className="px-4 py-2 border-b border-slate-800">
-                      <p className="text-xs text-slate-400">{user?.email}</p>
-                      <p className="font-semibold text-cyan-400 capitalize">{user?.role}</p>
-                    </div>
-
-                    <button
-                      onClick={() => handleNav('/dashboard')}
-                      className="w-full flex items-center gap-2.5 px-4 py-2 hover:bg-slate-800 text-left transition"
-                    >
-                      <UserIcon className="w-4 h-4 text-cyan-400" />
-                      <span>{t('navDashboard')}</span>
-                    </button>
-
-                    <button
-                      onClick={() => handleNav('/my-courses')}
-                      className="w-full flex items-center gap-2.5 px-4 py-2 hover:bg-slate-800 text-left transition"
-                    >
-                      <BookOpen className="w-4 h-4 text-sky-400" />
-                      <span>{t('navMyCourses')}</span>
-                    </button>
-
-                    <button
-                      onClick={() => handleNav('/my-notes')}
-                      className="w-full flex items-center gap-2.5 px-4 py-2 hover:bg-slate-800 text-left transition"
-                    >
-                      <FileText className="w-4 h-4 text-emerald-400" />
-                      <span>{t('navMyNotes')}</span>
-                    </button>
-
-                    <button
-                      onClick={() => handleNav('/resources')}
-                      className="w-full flex items-center gap-2.5 px-4 py-2 hover:bg-slate-800 text-left transition"
-                    >
-                      <FolderDown className="w-4 h-4 text-amber-400" />
-                      <span>{t('navResources')}</span>
-                    </button>
-
-                    <button
-                      onClick={() => handleNav('/payments')}
-                      className="w-full flex items-center gap-2.5 px-4 py-2 hover:bg-slate-800 text-left transition"
-                    >
-                      <CreditCard className="w-4 h-4 text-pink-400" />
-                      <span>{t('navPaymentHistory')}</span>
-                    </button>
-
-                    {isAdmin && (
-                      <button
-                        onClick={() => handleNav('/admin')}
-                        className="w-full flex items-center gap-2.5 px-4 py-2 hover:bg-amber-950/40 text-amber-300 font-semibold text-left transition border-t border-slate-800 mt-1"
-                      >
-                        <ShieldAlert className="w-4 h-4 text-amber-400" />
-                        <span>{t('navAdmin')}</span>
-                      </button>
+                <div className="relative">
+                  <button
+                    onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-sm font-medium text-white transition"
+                  >
+                    {user?.avatar ? (
+                      <img src={user.avatar} alt={user.name} className="w-7 h-7 rounded-full object-cover border border-cyan-500/40" />
+                    ) : (
+                      <div className="w-7 h-7 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 flex items-center justify-center font-bold text-xs">
+                        {user?.name?.charAt(0).toUpperCase()}
+                      </div>
                     )}
+                    <span className="max-w-[120px] truncate">{user?.name}</span>
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                      isAdmin 
+                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' 
+                        : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                    }`}>
+                      {isAdmin ? 'ADMIN' : (language === 'bn' ? 'শিক্ষার্থী' : 'STUDENT')}
+                    </span>
+                    <ChevronDown className="w-4 h-4 text-slate-400" />
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {userDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl py-2 z-50 animate-fade-in text-sm text-slate-200">
+                      <div className="px-4 py-3 border-b border-slate-800 flex items-center gap-3">
+                        {user?.avatar ? (
+                          <img src={user.avatar} alt={user.name} className="w-9 h-9 rounded-full object-cover border border-cyan-500/40 shrink-0" />
+                        ) : (
+                          <div className="w-9 h-9 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 flex items-center justify-center font-bold text-sm shrink-0">
+                            {user?.name?.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-white truncate text-xs">{user?.name}</p>
+                          <p className="text-[11px] text-slate-400 truncate">{user?.email}</p>
+                          <span className={`inline-block mt-0.5 px-1.5 py-0.2 rounded text-[9px] font-bold ${
+                            isAdmin 
+                              ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' 
+                              : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                          }`}>
+                            {isAdmin ? 'অ্যাডমিন অ্যাকাউন্ট' : 'শিক্ষার্থী অ্যাকাউন্ট'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {isAdmin ? (
+                        <>
+                          <button
+                            onClick={() => handleNav('/admin')}
+                            className="w-full flex items-center gap-2.5 px-4 py-2 hover:bg-amber-950/40 text-amber-300 font-bold text-left transition"
+                          >
+                            <ShieldAlert className="w-4 h-4 text-amber-400" />
+                            <span>{language === 'bn' ? 'গোপন অ্যাডমিন প্যানেল' : 'Admin Control Panel'}</span>
+                          </button>
+                          <button
+                            onClick={() => handleNav('/student-dashboard')}
+                            className="w-full flex items-center gap-2.5 px-4 py-2 hover:bg-slate-800 text-slate-300 text-left transition"
+                          >
+                            <UserIcon className="w-4 h-4 text-cyan-400" />
+                            <span>{language === 'bn' ? 'শিক্ষার্থী ভিউ ড্যাশবোর্ড' : 'Student View Dashboard'}</span>
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => handleNav('/dashboard')}
+                            className="w-full flex items-center gap-2.5 px-4 py-2 hover:bg-slate-800 text-left transition font-semibold"
+                          >
+                            <UserIcon className="w-4 h-4 text-cyan-400" />
+                            <span>{language === 'bn' ? 'শিক্ষার্থী ড্যাশবোর্ড' : 'Student Dashboard'}</span>
+                          </button>
+                          <button
+                            onClick={() => handleNav('/my-courses')}
+                            className="w-full flex items-center gap-2.5 px-4 py-2 hover:bg-slate-800 text-left transition"
+                          >
+                            <BookOpen className="w-4 h-4 text-sky-400" />
+                            <span>{t('navMyCourses')}</span>
+                          </button>
+                          <button
+                            onClick={() => handleNav('/my-notes')}
+                            className="w-full flex items-center gap-2.5 px-4 py-2 hover:bg-slate-800 text-left transition"
+                          >
+                            <FileText className="w-4 h-4 text-emerald-400" />
+                            <span>{t('navMyNotes')}</span>
+                          </button>
+                          <button
+                            onClick={() => handleNav('/resources')}
+                            className="w-full flex items-center gap-2.5 px-4 py-2 hover:bg-slate-800 text-left transition"
+                          >
+                            <FolderDown className="w-4 h-4 text-amber-400" />
+                            <span>{t('navResources')}</span>
+                          </button>
+                          <button
+                            onClick={() => handleNav('/payments')}
+                            className="w-full flex items-center gap-2.5 px-4 py-2 hover:bg-slate-800 text-left transition"
+                          >
+                            <CreditCard className="w-4 h-4 text-pink-400" />
+                            <span>{t('navPaymentHistory')}</span>
+                          </button>
+                        </>
+                      )}
 
                     <button
                       onClick={() => handleNav('/settings')}
@@ -186,7 +226,8 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, navigate }) => {
                   </div>
                 )}
               </div>
-            ) : (
+            </div>
+          ) : (
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => handleNav('/login')}
@@ -241,46 +282,80 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, navigate }) => {
 
           {isLoggedIn ? (
             <div className="pt-3 border-t border-slate-800 space-y-1">
-              <div className="px-4 py-2 text-xs text-slate-400">
-                {user?.name} ({user?.email})
+              <div className="px-4 py-2.5 flex items-center gap-3 border-b border-slate-800/80 mb-2">
+                {user?.avatar ? (
+                  <img src={user.avatar} alt={user.name} className="w-9 h-9 rounded-full object-cover border border-cyan-500/40" />
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 flex items-center justify-center font-bold text-sm">
+                    {user?.name?.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div>
+                  <div className="text-white font-semibold text-sm flex items-center gap-2">
+                    <span>{user?.name}</span>
+                    <span className={`px-1.5 py-0.2 rounded text-[9px] font-bold ${
+                      isAdmin 
+                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' 
+                        : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                    }`}>
+                      {isAdmin ? 'ADMIN' : (language === 'bn' ? 'শিক্ষার্থী' : 'STUDENT')}
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-slate-400">{user?.email}</div>
+                </div>
               </div>
-              <button
-                onClick={() => handleNav('/dashboard')}
-                className="w-full text-left px-4 py-2.5 rounded-xl text-sm text-slate-200 hover:bg-slate-900"
-              >
-                {t('navDashboard')}
-              </button>
-              <button
-                onClick={() => handleNav('/my-courses')}
-                className="w-full text-left px-4 py-2.5 rounded-xl text-sm text-slate-200 hover:bg-slate-900"
-              >
-                {t('navMyCourses')}
-              </button>
-              <button
-                onClick={() => handleNav('/my-notes')}
-                className="w-full text-left px-4 py-2.5 rounded-xl text-sm text-slate-200 hover:bg-slate-900"
-              >
-                {t('navMyNotes')}
-              </button>
-              <button
-                onClick={() => handleNav('/resources')}
-                className="w-full text-left px-4 py-2.5 rounded-xl text-sm text-slate-200 hover:bg-slate-900"
-              >
-                {t('navResources')}
-              </button>
-              <button
-                onClick={() => handleNav('/payments')}
-                className="w-full text-left px-4 py-2.5 rounded-xl text-sm text-slate-200 hover:bg-slate-900"
-              >
-                {t('navPaymentHistory')}
-              </button>
-              {isAdmin && (
-                <button
-                  onClick={() => handleNav('/admin')}
-                  className="w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold text-amber-300 bg-amber-950/30 border border-amber-500/30"
-                >
-                  {t('navAdmin')}
-                </button>
+
+              {isAdmin ? (
+                <>
+                  <button
+                    onClick={() => handleNav('/admin')}
+                    className="w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold text-amber-300 bg-amber-950/40 border border-amber-500/30 flex items-center gap-2"
+                  >
+                    <ShieldAlert className="w-4 h-4 text-amber-400" />
+                    <span>{language === 'bn' ? 'গোপন অ্যাডমিন প্যানেল' : 'Admin Control Panel'}</span>
+                  </button>
+                  <button
+                    onClick={() => handleNav('/student-dashboard')}
+                    className="w-full text-left px-4 py-2.5 rounded-xl text-sm text-slate-200 hover:bg-slate-900 flex items-center gap-2"
+                  >
+                    <UserIcon className="w-4 h-4 text-cyan-400" />
+                    <span>{language === 'bn' ? 'শিক্ষার্থী ভিউ ড্যাশবোর্ড' : 'Student View Dashboard'}</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => handleNav('/dashboard')}
+                    className="w-full text-left px-4 py-2.5 rounded-xl text-sm text-slate-200 hover:bg-slate-900 flex items-center gap-2"
+                  >
+                    <UserIcon className="w-4 h-4 text-cyan-400" />
+                    <span>{language === 'bn' ? 'শিক্ষার্থী ড্যাশবোর্ড' : 'Student Dashboard'}</span>
+                  </button>
+                  <button
+                    onClick={() => handleNav('/my-courses')}
+                    className="w-full text-left px-4 py-2.5 rounded-xl text-sm text-slate-200 hover:bg-slate-900"
+                  >
+                    {t('navMyCourses')}
+                  </button>
+                  <button
+                    onClick={() => handleNav('/my-notes')}
+                    className="w-full text-left px-4 py-2.5 rounded-xl text-sm text-slate-200 hover:bg-slate-900"
+                  >
+                    {t('navMyNotes')}
+                  </button>
+                  <button
+                    onClick={() => handleNav('/resources')}
+                    className="w-full text-left px-4 py-2.5 rounded-xl text-sm text-slate-200 hover:bg-slate-900"
+                  >
+                    {t('navResources')}
+                  </button>
+                  <button
+                    onClick={() => handleNav('/payments')}
+                    className="w-full text-left px-4 py-2.5 rounded-xl text-sm text-slate-200 hover:bg-slate-900"
+                  >
+                    {t('navPaymentHistory')}
+                  </button>
+                </>
               )}
               <button
                 onClick={() => handleNav('/settings')}

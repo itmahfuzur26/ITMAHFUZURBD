@@ -189,6 +189,20 @@ export interface SiteSettings {
   facebook_group: string;
   tagline_bn: string;
   tagline_en: string;
+  instructor_bio_bn?: string;
+  instructor_bio_en?: string;
+  hero_headline_bn?: string;
+  hero_headline_en?: string;
+  hero_subheadline_bn?: string;
+  hero_subheadline_en?: string;
+  notice_enabled?: boolean;
+  notice_text_bn?: string;
+  notice_text_en?: string;
+  full_course_price?: number;
+  full_course_discount_price?: number;
+  bundle_offer_enabled?: boolean;
+  bundle_title_bn?: string;
+  bundle_title_en?: string;
 }
 
 export interface DatabaseSchema {
@@ -242,6 +256,21 @@ function ensureDbFile(): DatabaseSchema {
         }
         if (!inMemoryDb.settings.tagline_en) {
           inMemoryDb.settings.tagline_en = 'ITMahfuzur — Technology Education Built on Experience, Your Partner in Skill Development.';
+        }
+        if (inMemoryDb.settings.full_course_price === undefined) {
+          inMemoryDb.settings.full_course_price = 5000;
+        }
+        if (inMemoryDb.settings.full_course_discount_price === undefined) {
+          inMemoryDb.settings.full_course_discount_price = 3500;
+        }
+        if (inMemoryDb.settings.bundle_offer_enabled === undefined) {
+          inMemoryDb.settings.bundle_offer_enabled = true;
+        }
+        if (!inMemoryDb.settings.bundle_title_bn) {
+          inMemoryDb.settings.bundle_title_bn = 'ফুল কোর্স অল-ইন-ওয়ান স্পেশাল প্যাক (সব কোর্স একসাথে)';
+        }
+        if (!inMemoryDb.settings.bundle_title_en) {
+          inMemoryDb.settings.bundle_title_en = 'All-in-One Full Course Master Bundle (All Courses Included)';
         }
       }
 
@@ -811,10 +840,25 @@ function getSeedData(): DatabaseSchema {
     payment_instructions_bn: '১. আপনার bKash অ্যাপ ওপেন করুন অথবা *247# ডায়াল করুন।\n২. Send Money (পার্সোনাল) অপশন বেছে নিন।\n৩. প্রাপক নম্বর হিসেবে লিখুন: 01762-766261\n৪. কোর্সের জন্য উল্লেখিত সঠিক টাকার পরিমাণ লিখুন।\n৫. রেফারেন্সে আপনার নাম বা কোর্সের নাম লিখতে পারেন।\n৬. সেন্ড মানি সফল হলে প্রাপ্ত Transaction ID (TrxID) এবং যে bKash নম্বর থেকে পাঠিয়েছেন তা সংরক্ষণ করুন।\n৭. নিচের ফর্মে TrxID ও নম্বর সঠিকভাবে পূরণ করে সাবমিট করুন।\n৮. অ্যাডমিন কর্তৃক যাচাই করার পর আপনার কোর্সে অ্যাক্সেস দেওয়া হবে।',
     payment_instructions_en: '1. Open your bKash app or dial *247#.\n2. Select "Send Money" (Personal).\n3. Enter recipient number: 01762-766261.\n4. Enter the exact course fee amount.\n5. You may write your name as reference.\n6. Keep note of the Transaction ID (TrxID) and the sender bKash number.\n7. Fill in the transaction ID and sender number in the payment form below and submit.\n8. Once the admin manually verifies your transaction, access will be granted immediately.',
     logo_url: 'https://res.cloudinary.com/ru3hghyn/image/upload/v1793023123/FB_IMG_1792469317535.jpg',
+    instructor_photo_url: 'https://res.cloudinary.com/ru3hghyn/image/upload/v1793028848/1000030687-removebg-preview.png',
     facebook_page: 'https://www.facebook.com/share/1G1riLzDqa/',
     facebook_group: 'https://www.facebook.com/groups/518193848887774/?ref=share&mibextid=NSMWBT',
     tagline_bn: 'ITMahfuzur — অভিজ্ঞতার আলোকে প্রযুক্তি শিক্ষা, দক্ষতা উন্নয়নে আপনার বিশ্বস্ত সঙ্গী।',
-    tagline_en: 'ITMahfuzur — Technology Education Built on Experience, Your Partner in Skill Development.'
+    tagline_en: 'ITMahfuzur — Technology Education Built on Experience, Your Partner in Skill Development.',
+    instructor_bio_bn: '২০১৮ সাল থেকে আইটি সেক্টরে গ্রাফিক ডিজাইন, প্রম্পট ইঞ্জিনিয়ারিং, আধুনিক AI টুলস এবং ডিজিটাল মার্কেটিং এ সফলভাবে কর্মরত। অভিজ্ঞতার আলোকে বাস্তবমুখী প্রশিক্ষণ প্রদান করাই মূল লক্ষ্য।',
+    instructor_bio_en: 'Working professionally in the IT industry since 2018 specializing in Graphic Design, Prompt Engineering, cutting-edge AI Tools, and Digital Marketing.',
+    hero_headline_bn: 'অভিজ্ঞতার আলোকে প্রযুক্তি শিক্ষা ও দক্ষতা উন্নয়ন',
+    hero_headline_en: 'Practical Technology Education Built on Real Experience',
+    hero_subheadline_bn: 'আইটি মাহফুজুর (ITMahfuzur) এ গ্রাফিক ডিজাইন, আধুনিক AI টুলস, প্রম্পট ইঞ্জিনিয়ারিং এবং ডিজিটাল মার্কেটিং শিখুন সরাসরি ২০১৮ সাল থেকে বাস্তব ক্ষেত্রে কর্মরত প্রফেশনালের তত্ত্বাবধানে।',
+    hero_subheadline_en: 'Learn Graphic Design, Modern AI Tools, Prompt Engineering, and Digital Marketing guided directly by Mahfuzur Rahman Mahdi, in the IT industry since 2018.',
+    notice_enabled: true,
+    notice_text_bn: '📢 নতুন ব্যাচে ভর্তি চলছে! সরাসরি বিকাশ (01762-766261) এ পেমেন্ট করে আজই আপনার পছন্দের কোর্সে যুক্ত হোন।',
+    notice_text_en: '📢 New batch admission is open! Send money via bKash (01762-766261) and start learning today.',
+    full_course_price: 5000,
+    full_course_discount_price: 3500,
+    bundle_offer_enabled: true,
+    bundle_title_bn: 'ফুল কোর্স অল-ইন-ওয়ান স্পেশাল প্যাক (সব কোর্স একসাথে)',
+    bundle_title_en: 'All-in-One Full Course Master Bundle (All Courses Included)'
   };
 
   return {

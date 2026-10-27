@@ -101,6 +101,16 @@ function userHasCourseAccess(userId: string | undefined, userRole: string | unde
   return !!enrollment;
 }
 
+// Health check endpoint
+app.get('/api/health', (_req: Request, res: Response): void => {
+  res.json({
+    status: 'ok',
+    server: 'ITMahfuzur API Server',
+    connected: true,
+    time: new Date().toISOString()
+  });
+});
+
 // ----------------------------------------------------
 // AUTH ROUTES
 // ----------------------------------------------------
@@ -165,6 +175,7 @@ app.post('/api/auth/register', (req: Request, res: Response): void => {
         email: newUser.email,
         role: newUser.role,
         phone: newUser.phone,
+        avatar: newUser.avatar,
       }
     });
   } catch (err: any) {
@@ -231,6 +242,7 @@ app.post('/api/auth/login', (req: Request, res: Response): void => {
         role: user.role,
         phone: user.phone,
         bio: user.bio,
+        avatar: user.avatar,
       }
     });
   } catch (err: any) {
@@ -255,12 +267,13 @@ app.get('/api/auth/me', authenticateToken, (req: Request, res: Response): void =
     role: user.role,
     phone: user.phone,
     bio: user.bio,
+    avatar: user.avatar,
   });
 });
 
 // Update profile
 app.put('/api/auth/profile', authenticateToken, (req: Request, res: Response): void => {
-  const { name, phone, bio, currentPassword, newPassword } = req.body;
+  const { name, phone, bio, avatar, currentPassword, newPassword } = req.body;
   const db = getDb();
   const userIndex = db.users.findIndex(u => u.id === req.user?.id);
   if (userIndex === -1) {
@@ -281,6 +294,7 @@ app.put('/api/auth/profile', authenticateToken, (req: Request, res: Response): v
   if (name) user.name = name.trim();
   if (phone !== undefined) user.phone = phone.trim();
   if (bio !== undefined) user.bio = bio.trim();
+  if (avatar !== undefined) user.avatar = avatar;
 
   db.users[userIndex] = user;
   saveDb(db);
@@ -292,6 +306,7 @@ app.put('/api/auth/profile', authenticateToken, (req: Request, res: Response): v
     role: user.role,
     phone: user.phone,
     bio: user.bio,
+    avatar: user.avatar,
   });
 });
 
@@ -326,11 +341,12 @@ app.post('/api/auth/forgot-password', (req: Request, res: Response): void => {
     if (!db.notifications) db.notifications = [];
     db.notifications.unshift({
       id: `notif_pwd_${Date.now()}`,
+      user_id: user.id,
       title_bn: 'পাসওয়ার্ড রিকভারি সফল',
       title_en: 'Password Recovery Dispatched',
       message_bn: `${user.name} (${user.email}) এর ইমেইলে নতুন পাসওয়ার্ড পাঠানো হয়েছে।`,
       message_en: `New password dispatched to ${user.name} (${user.email}).`,
-      type: 'system',
+      read: false,
       created_at: new Date().toISOString()
     });
 
@@ -1430,6 +1446,32 @@ app.put('/api/admin/courses/:id', authenticateToken, requireAdmin, (req: Request
   res.json(course);
 });
 
+// Admin Quick Update Course Price
+app.patch('/api/admin/courses/:id/price', authenticateToken, requireAdmin, (req: Request, res: Response): void => {
+  const { id } = req.params;
+  const { price, isFree } = req.body;
+  const db = getDb();
+  const course = db.courses.find(c => c.id === id);
+  if (!course) {
+    res.status(404).json({ error: 'Course not found' });
+    return;
+  }
+
+  if (isFree !== undefined) {
+    course.isFree = Boolean(isFree);
+    if (course.isFree) {
+      course.price = 0;
+    }
+  }
+
+  if (price !== undefined && !course.isFree) {
+    course.price = Math.max(0, Number(price));
+  }
+
+  saveDb(db);
+  res.json({ message: 'Course price updated successfully', course });
+});
+
 // Admin Add Module
 app.post('/api/admin/courses/:id/modules', authenticateToken, requireAdmin, (req: Request, res: Response): void => {
   const { id } = req.params;
@@ -1476,6 +1518,51 @@ app.post('/api/admin/modules/:moduleId/lessons', authenticateToken, requireAdmin
   saveDb(db);
 
   res.json(newLesson);
+});
+
+// Admin Delete Course
+app.delete('/api/admin/courses/:id', authenticateToken, requireAdmin, (req: Request, res: Response): void => {
+  const { id } = req.params;
+  const db = getDb();
+  const idx = db.courses.findIndex(c => c.id === id);
+  if (idx === -1) {
+    res.status(404).json({ error: 'Course not found' });
+    return;
+  }
+  db.courses.splice(idx, 1);
+  db.modules = db.modules.filter(m => m.course_id !== id);
+  db.lessons = db.lessons.filter(l => l.course_id !== id);
+  saveDb(db);
+  res.json({ success: true, message: 'Course deleted successfully' });
+});
+
+// Admin Delete Module
+app.delete('/api/admin/modules/:id', authenticateToken, requireAdmin, (req: Request, res: Response): void => {
+  const { id } = req.params;
+  const db = getDb();
+  const idx = db.modules.findIndex(m => m.id === id);
+  if (idx === -1) {
+    res.status(404).json({ error: 'Module not found' });
+    return;
+  }
+  db.modules.splice(idx, 1);
+  db.lessons = db.lessons.filter(l => l.module_id !== id);
+  saveDb(db);
+  res.json({ success: true, message: 'Module deleted successfully' });
+});
+
+// Admin Delete Lesson
+app.delete('/api/admin/lessons/:id', authenticateToken, requireAdmin, (req: Request, res: Response): void => {
+  const { id } = req.params;
+  const db = getDb();
+  const idx = db.lessons.findIndex(l => l.id === id);
+  if (idx === -1) {
+    res.status(404).json({ error: 'Lesson not found' });
+    return;
+  }
+  db.lessons.splice(idx, 1);
+  saveDb(db);
+  res.json({ success: true, message: 'Lesson deleted successfully' });
 });
 
 // Admin Manage Comments / Reports
@@ -1593,25 +1680,125 @@ app.get('/api/admin/settings', (_req: Request, res: Response): void => {
 app.put('/api/admin/settings', authenticateToken, requireAdmin, (req: Request, res: Response): void => {
   const db = getDb();
   const data = req.body;
-  if (data.logo_url) db.settings.logo_url = data.logo_url.trim();
-  if (data.instructor_photo_url) db.settings.instructor_photo_url = data.instructor_photo_url.trim();
-  if (data.facebook_page) db.settings.facebook_page = data.facebook_page.trim();
-  if (data.facebook_group) db.settings.facebook_group = data.facebook_group.trim();
-  if (data.tagline_bn) db.settings.tagline_bn = data.tagline_bn.trim();
-  if (data.tagline_en) db.settings.tagline_en = data.tagline_en.trim();
-  if (data.bkash_number) db.settings.bkash_number = data.bkash_number.trim();
-  if (data.bkash_type) db.settings.bkash_type = data.bkash_type.trim();
-  if (data.whatsapp_number) db.settings.whatsapp_number = data.whatsapp_number.trim();
-  if (data.phone) db.settings.phone = data.phone.trim();
-  if (data.email) db.settings.email = data.email.trim();
-  if (data.brand_name) db.settings.brand_name = data.brand_name.trim();
-  if (data.brand_name_bn) db.settings.brand_name_bn = data.brand_name_bn.trim();
-  if (data.instructor_name) db.settings.instructor_name = data.instructor_name.trim();
-  if (data.payment_instructions_bn) db.settings.payment_instructions_bn = data.payment_instructions_bn;
-  if (data.payment_instructions_en) db.settings.payment_instructions_en = data.payment_instructions_en;
+  if (data.logo_url !== undefined) db.settings.logo_url = data.logo_url.trim();
+  if (data.instructor_photo_url !== undefined) db.settings.instructor_photo_url = data.instructor_photo_url.trim();
+  if (data.facebook_page !== undefined) db.settings.facebook_page = data.facebook_page.trim();
+  if (data.facebook_group !== undefined) db.settings.facebook_group = data.facebook_group.trim();
+  if (data.tagline_bn !== undefined) db.settings.tagline_bn = data.tagline_bn.trim();
+  if (data.tagline_en !== undefined) db.settings.tagline_en = data.tagline_en.trim();
+  if (data.bkash_number !== undefined) db.settings.bkash_number = data.bkash_number.trim();
+  if (data.bkash_type !== undefined) db.settings.bkash_type = data.bkash_type.trim();
+  if (data.whatsapp_number !== undefined) db.settings.whatsapp_number = data.whatsapp_number.trim();
+  if (data.phone !== undefined) db.settings.phone = data.phone.trim();
+  if (data.email !== undefined) db.settings.email = data.email.trim();
+  if (data.brand_name !== undefined) db.settings.brand_name = data.brand_name.trim();
+  if (data.brand_name_bn !== undefined) db.settings.brand_name_bn = data.brand_name_bn.trim();
+  if (data.instructor_name !== undefined) db.settings.instructor_name = data.instructor_name.trim();
+  if (data.experience_since !== undefined) db.settings.experience_since = data.experience_since.trim();
+  if (data.payment_instructions_bn !== undefined) db.settings.payment_instructions_bn = data.payment_instructions_bn;
+  if (data.payment_instructions_en !== undefined) db.settings.payment_instructions_en = data.payment_instructions_en;
+  if (data.instructor_bio_bn !== undefined) db.settings.instructor_bio_bn = data.instructor_bio_bn.trim();
+  if (data.instructor_bio_en !== undefined) db.settings.instructor_bio_en = data.instructor_bio_en.trim();
+  if (data.hero_headline_bn !== undefined) db.settings.hero_headline_bn = data.hero_headline_bn.trim();
+  if (data.hero_headline_en !== undefined) db.settings.hero_headline_en = data.hero_headline_en.trim();
+  if (data.hero_subheadline_bn !== undefined) db.settings.hero_subheadline_bn = data.hero_subheadline_bn.trim();
+  if (data.hero_subheadline_en !== undefined) db.settings.hero_subheadline_en = data.hero_subheadline_en.trim();
+  if (data.notice_enabled !== undefined) db.settings.notice_enabled = Boolean(data.notice_enabled);
+  if (data.notice_text_bn !== undefined) db.settings.notice_text_bn = data.notice_text_bn.trim();
+  if (data.notice_text_en !== undefined) db.settings.notice_text_en = data.notice_text_en.trim();
+  if (data.full_course_price !== undefined) db.settings.full_course_price = Number(data.full_course_price);
+  if (data.full_course_discount_price !== undefined) db.settings.full_course_discount_price = Number(data.full_course_discount_price);
+  if (data.bundle_offer_enabled !== undefined) db.settings.bundle_offer_enabled = Boolean(data.bundle_offer_enabled);
+  if (data.bundle_title_bn !== undefined) db.settings.bundle_title_bn = data.bundle_title_bn.trim();
+  if (data.bundle_title_en !== undefined) db.settings.bundle_title_en = data.bundle_title_en.trim();
 
   saveDb(db);
   res.json(db.settings);
+});
+
+// Admin Students Management
+app.get('/api/admin/students', authenticateToken, requireAdmin, (_req: Request, res: Response): void => {
+  const db = getDb();
+  const students = db.users.map(u => {
+    const userEnrollments = db.enrollments.filter(e => e.user_id === u.id && e.status === 'active');
+    const enrolledCourses = userEnrollments.map(e => {
+      const course = db.courses.find(c => c.id === e.course_id);
+      return {
+        id: e.course_id,
+        title_bn: course?.title_bn || 'Course',
+        title_en: course?.title_en || 'Course',
+        enrolled_at: e.enrolled_at,
+      };
+    });
+
+    return {
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      role: u.role,
+      phone: u.phone,
+      bio: u.bio,
+      avatar: u.avatar,
+      createdAt: u.createdAt,
+      enrolledCourses,
+    };
+  });
+  res.json(students);
+});
+
+// Admin Manually Grant Access to Course
+app.post('/api/admin/students/:userId/grant-access', authenticateToken, requireAdmin, (req: Request, res: Response): void => {
+  const { userId } = req.params;
+  const { course_id } = req.body;
+  const db = getDb();
+
+  const student = db.users.find(u => u.id === userId);
+  const course = db.courses.find(c => c.id === course_id);
+  if (!student || !course) {
+    res.status(404).json({ error: 'Student or course not found' });
+    return;
+  }
+
+  const existing = db.enrollments.find(e => e.user_id === userId && e.course_id === course_id);
+  if (existing) {
+    existing.status = 'active';
+  } else {
+    db.enrollments.push({
+      id: 'enr_' + Date.now(),
+      user_id: userId,
+      course_id,
+      enrolled_at: new Date().toISOString(),
+      status: 'active',
+    });
+  }
+
+  db.notifications.push({
+    id: 'notif_' + Date.now(),
+    user_id: userId,
+    title_bn: `কোর্স এক্সেস অনুমোদিত: ${course.title_bn}`,
+    title_en: `Course Access Granted: ${course.title_en}`,
+    message_bn: `অ্যাডমিন কর্তৃক আপনাকে সরাসরি "${course.title_bn}" কোর্সে পূর্ণ এক্সেস দেওয়া হয়েছে। এখনই ক্লাস শুরু করতে পারেন।`,
+    message_en: `Admin has directly granted you full access to "${course.title_en}". You can start learning now.`,
+    read: false,
+    link: `/courses/${course_id}/learn`,
+    created_at: new Date().toISOString(),
+  });
+
+  saveDb(db);
+  res.json({ success: true, message: 'Access granted successfully' });
+});
+
+// Admin Revoke Course Access
+app.post('/api/admin/students/:userId/revoke-access', authenticateToken, requireAdmin, (req: Request, res: Response): void => {
+  const { userId } = req.params;
+  const { course_id } = req.body;
+  const db = getDb();
+  const enrollment = db.enrollments.find(e => e.user_id === userId && e.course_id === course_id);
+  if (enrollment) {
+    enrollment.status = 'revoked';
+    saveDb(db);
+  }
+  res.json({ success: true, message: 'Access revoked' });
 });
 
 // Contact Form submission
