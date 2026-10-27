@@ -50,7 +50,7 @@ export const HomePage: React.FC<HomePageProps> = ({ navigate }) => {
       .catch(() => {})
       .finally(() => setLoading(false));
 
-    fetch('/api/admin/settings')
+    fetchWithAuth('/api/admin/settings')
       .then(res => res.json())
       .then(data => setSettings(data))
       .catch(() => {});

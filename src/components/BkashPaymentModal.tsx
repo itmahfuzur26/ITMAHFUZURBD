@@ -66,7 +66,7 @@ export const BkashPaymentModal: React.FC<BkashPaymentModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      fetch('/api/admin/settings')
+      fetchWithAuth('/api/admin/settings')
         .then(res => res.json())
         .then(data => setSettings(data))
         .catch(() => {});

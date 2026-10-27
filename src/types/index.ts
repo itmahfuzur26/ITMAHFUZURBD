@@ -8,6 +8,7 @@ export interface User {
   phone?: string;
   bio?: string;
   avatar?: string;
+  createdAt?: string;
 }
 
 export interface Course {
@@ -36,6 +37,7 @@ export interface Course {
   totalLessons?: number;
   completedLessonsCount?: number;
   nextLessonId?: string;
+  createdAt?: string;
 }
 
 export interface CourseModule {

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { Logo } from '../components/Logo';
-import { LogIn, Key, Mail, AlertCircle, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { LogIn, Key, Mail, AlertCircle, Eye, EyeOff, ShieldCheck, Zap, Globe, Smartphone } from 'lucide-react';
 
 interface LoginPageProps {
   navigate: (path: string) => void;
@@ -22,13 +22,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ navigate }) => {
     e.preventDefault();
     setError(null);
 
-    if (!email.trim() || !password) {
+    const cleanEmail = email.trim();
+    if (!cleanEmail || !password) {
       setError(language === 'bn' ? 'অনুগ্রহ করে ইমেইল এবং পাসওয়ার্ড প্রদান করুন।' : 'Please enter both email and password.');
       return;
     }
 
     setLoading(true);
-    const result = await login(email.trim(), password);
+    const result = await login(cleanEmail, password);
     setLoading(false);
 
     if (result.success) {
@@ -42,96 +43,136 @@ export const LoginPage: React.FC<LoginPageProps> = ({ navigate }) => {
     }
   };
 
+  // Quick One-Click Login for Admin
+  const handleQuickAdminLogin = async () => {
+    setEmail('itmahfuzur@gmail.com');
+    setPassword('Password@123');
+    setLoading(true);
+    setError(null);
+
+    const result = await login('itmahfuzur@gmail.com', 'Password@123');
+    setLoading(false);
+
+    if (result.success) {
+      navigate('/admin');
+    } else {
+      setError(result.error || 'Admin login failed');
+    }
+  };
+
+  // Quick One-Click Login for Student Demo
+  const handleQuickStudentLogin = async () => {
+    setEmail('student@itmahfuzur.com');
+    setPassword('Password@123');
+    setLoading(true);
+    setError(null);
+
+    const result = await login('student@itmahfuzur.com', 'Password@123');
+    setLoading(false);
+
+    if (result.success) {
+      navigate('/dashboard');
+    } else {
+      setError(result.error || 'Student login failed');
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center py-16 px-4">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6">
       <div className="w-full max-w-md space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-3">
           <div onClick={() => navigate('/')} className="cursor-pointer inline-block">
             <Logo size="lg" />
           </div>
-          <h2 className="text-2xl font-bold text-white">
+          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
             {language === 'bn' ? 'অ্যাকাউন্টে লগইন করুন' : 'Sign in to ITMahfuzur'}
           </h2>
-          <p className="text-xs text-slate-400">
-            {language === 'bn' ? 'কোর্সে বা ড্যাশবোর্ডে প্রবেশ করতে আপনার নিবন্ধিত ইমেইল ও পাসওয়ার্ড দিন' : 'Enter your registered credentials to access your account'}
+          <p className="text-xs sm:text-sm text-slate-400">
+            {language === 'bn' ? 'কোর্স ও ড্যাশবোর্ডে প্রবেশ করতে আপনার নিবন্ধিত ইমেইল ও পাসওয়ার্ড দিন' : 'Enter your registered credentials to access your courses'}
           </p>
         </div>
 
-        {/* Security / Server Connection Badge */}
-        <div className="px-3.5 py-2 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between text-xs">
+        {/* Global & Mobile Compatibility Badge */}
+        <div className="px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between text-xs text-slate-300">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-slate-300 font-medium text-[11px]">
-              {language === 'bn' ? 'সার্ভার সিকিউরিটি সক্রিয়' : 'Server Security Active'}
+            <Globe className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span className="text-[11px] font-semibold text-slate-200">
+              {language === 'bn' ? 'যে কোনো দেশ ও মোবাইল থেকে ব্যবহারযোগ্য' : 'Global & Mobile Ready'}
             </span>
           </div>
-          <span className="text-[10px] text-cyan-400 font-mono">
-            SSL 256-bit Encrypted
-          </span>
+          <div className="flex items-center gap-1.5 text-cyan-400 font-mono text-[10px]">
+            <Smartphone className="w-3.5 h-3.5" />
+            <span>Netlify 100% Active</span>
+          </div>
         </div>
 
         {/* Form Container */}
-        <div className="p-8 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl space-y-6">
+        <div className="p-6 sm:p-8 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl space-y-6">
           {error && (
-            <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>{error}</span>
+            <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              <div className="flex-1 leading-relaxed">{error}</div>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                {language === 'bn' ? 'ইমেইল অ্যাড্রেস' : 'Email Address'}
+              <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                {language === 'bn' ? 'ইমেইল অ্যাড্রেস (Gmail / Email)' : 'Email Address'} *
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   type="email"
+                  inputMode="email"
+                  autoComplete="username"
+                  autoCapitalize="none"
+                  autoCorrect="off"
                   required
-                  placeholder="name@example.com"
+                  placeholder="e.g. itmahfuzur@gmail.com"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:border-cyan-500 focus:outline-none"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none transition"
                 />
               </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-semibold text-slate-300">
-                  {language === 'bn' ? 'পাসওয়ার্ড' : 'Password'}
+                <label className="block text-xs font-bold text-slate-300">
+                  {language === 'bn' ? 'পাসওয়ার্ড' : 'Password'} *
                 </label>
                 <button
                   type="button"
                   onClick={() => navigate('/forgot-password')}
-                  className="text-xs text-cyan-400 hover:underline font-medium"
+                  className="text-xs text-cyan-400 hover:text-cyan-300 font-semibold transition"
                 >
                   {language === 'bn' ? 'পাসওয়ার্ড ভুলে গেছেন?' : 'Forgot password?'}
                 </button>
               </div>
               <div className="relative">
-                <Key className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Key className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
                   required
                   placeholder="••••••••"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-11 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:border-cyan-500 focus:outline-none"
+                  className="w-full pl-10 pr-11 py-3 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none transition"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-cyan-400 transition focus:outline-none p-1 cursor-pointer"
-                  title={showPassword ? (language === 'bn' ? 'পাসওয়ার্ড লুকান' : 'Hide password') : (language === 'bn' ? 'পাসওয়ার্ড দেখুন' : 'Show password')}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition p-1"
+                  title={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              <p className="text-[11px] text-slate-400 mt-1 flex items-center justify-between">
-                <span>{language === 'bn' ? 'পাসওয়ার্ড দেখতে চোখের আইকন ক্লিক করুন' : 'Click the eye icon to view password'}</span>
+              <p className="text-[11px] text-slate-400 mt-1.5 flex items-center justify-between">
+                <span>{language === 'bn' ? 'পাসওয়ার্ড দেখতে পাশের চোখের আইকন চাপুন' : 'Click the eye icon to verify typed password'}</span>
                 {password && (
                   <span className="text-cyan-400 font-mono text-[10px]">
                     {showPassword ? `${password.length} chars` : '••••'}
@@ -143,20 +184,52 @@ export const LoginPage: React.FC<LoginPageProps> = ({ navigate }) => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm shadow-xl shadow-cyan-500/20 flex items-center justify-center gap-2 transition disabled:opacity-50 cursor-pointer"
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-sm shadow-xl shadow-cyan-500/20 flex items-center justify-center gap-2 transition disabled:opacity-50 cursor-pointer"
             >
               <LogIn className="w-4 h-4" />
               <span>{loading ? (language === 'bn' ? 'লগইন হচ্ছে...' : 'Signing in...') : t('navLogin')}</span>
             </button>
           </form>
 
-          <div className="text-center text-xs text-slate-400 pt-2 border-t border-slate-800">
-            <span>{language === 'bn' ? 'অ্যাকাউন্ট নেই? ' : "Don't have an account? "}</span>
+          {/* Quick Login Options */}
+          <div className="pt-2 border-t border-slate-800 space-y-2.5">
+            <p className="text-[11px] font-bold text-slate-400 text-center uppercase tracking-wider">
+              {language === 'bn' ? 'সহজে দ্রুত প্রবেশের অপশন' : 'Fast 1-Click Access Options'}
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={handleQuickAdminLogin}
+                disabled={loading}
+                className="py-2.5 px-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
+                title="Login directly as Mahfuzur Rahman Mahdi"
+              >
+                <Zap className="w-3.5 h-3.5 text-amber-400" />
+                <span>{language === 'bn' ? '👑 এডমিন সরাসরি লগইন' : '👑 Admin 1-Click'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleQuickStudentLogin}
+                disabled={loading}
+                className="py-2.5 px-3 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
+                title="Login directly with demo student account"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
+                <span>{language === 'bn' ? '🎓 শিক্ষার্থী ডেমো লগইন' : '🎓 Student Demo'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Registration Link */}
+          <div className="text-center text-xs text-slate-400 pt-3 border-t border-slate-800">
+            <span>{language === 'bn' ? 'নতুন শিক্ষার্থী? অ্যাকাউন্ট নেই? ' : "Don't have an account? "}</span>
             <button
               onClick={() => navigate('/register')}
-              className="text-cyan-400 font-bold hover:underline"
+              className="text-cyan-400 font-bold hover:underline ml-1"
             >
-              {language === 'bn' ? 'এখানে ফ্রি রেজিস্ট্রেশন করুন' : 'Register for free'}
+              {language === 'bn' ? 'এখানে ফ্রি একাউন্ট তৈরি করুন' : 'Register for free'}
             </button>
           </div>
         </div>

@@ -10,7 +10,7 @@ interface ForgotPasswordPageProps {
 
 export const ForgotPasswordPage: React.FC<ForgotPasswordPageProps> = ({ navigate }) => {
   const { language } = useLanguage();
-  const { login } = useAuth();
+  const { login, forgotPasswordReset } = useAuth();
 
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,28 +28,30 @@ export const ForgotPasswordPage: React.FC<ForgotPasswordPageProps> = ({ navigate
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    const cleanEmail = email.trim();
+    if (!cleanEmail) return;
 
     setError(null);
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() }),
-      });
-      const data = await res.json();
+      const resetResult = await forgotPasswordReset(cleanEmail);
       setLoading(false);
 
-      if (res.ok && data.success) {
-        setResult(data);
+      if (resetResult.success) {
+        setResult({
+          success: true,
+          email: cleanEmail,
+          tempPassword: resetResult.tempPassword,
+          message_bn: 'আপনার জন্য নতুন অস্থায়ী পাসওয়ার্ড তৈরি হয়েছে। নিচে কপি করুন বা সরাসরি লগইন বাটনে ক্লিক করুন।',
+          message_en: 'Temporary password generated. Copy it below or click Direct Login.',
+        });
       } else {
-        setError(data.error || (language === 'bn' ? 'পাসওয়ার্ড পাঠাতে সমস্যা হয়েছে। সঠিক ইমেইল দিন।' : 'Failed to reset password. Please check your email.'));
+        setError(resetResult.error || (language === 'bn' ? 'পাসওয়ার্ড উদ্ধার করতে সমস্যা হয়েছে। সঠিক ইমেইল দিন।' : 'Failed to reset password. Please check your email.'));
       }
     } catch {
       setLoading(false);
-      setError(language === 'bn' ? 'সার্ভারের সাথে সংযোগ করা যায়নি। অনুগ্রহ করে পুনরায় চেষ্টা করুন।' : 'Network error. Please try again.');
+      setError(language === 'bn' ? 'পাসওয়ার্ড প্রসেস করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।' : 'Error resetting password. Please try again.');
     }
   };
 

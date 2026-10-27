@@ -23,7 +23,7 @@ export const CoursesPage: React.FC<CoursesPageProps> = ({ navigate, initialCateg
 
   useEffect(() => {
     fetchCourses();
-    fetch('/api/admin/settings')
+    fetchWithAuth('/api/admin/settings')
       .then(res => res.json())
       .then(data => setSettings(data))
       .catch(() => {});
