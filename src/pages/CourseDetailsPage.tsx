@@ -367,15 +367,16 @@ export const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({ courseId, 
         </div>
       </div>
 
-      {/* Manual bKash Payment Modal */}
+      {/* bKash Payment Modal */}
       {course && (
         <BkashPaymentModal
           course={course}
           isOpen={bkashModalOpen}
           onClose={() => setBkashModalOpen(false)}
+          navigate={navigate}
           onPaymentSubmitted={() => {
             setBkashModalOpen(false);
-            navigate('/payments');
+            loadCourseDetails();
           }}
         />
       )}

@@ -366,6 +366,7 @@ export const CoursesPage: React.FC<CoursesPageProps> = ({ navigate, initialCateg
           course={selectedCourseForBkash}
           isOpen={!!selectedCourseForBkash}
           onClose={() => setSelectedCourseForBkash(null)}
+          navigate={navigate}
           onPaymentSubmitted={() => {
             setSelectedCourseForBkash(null);
             fetchCourses();

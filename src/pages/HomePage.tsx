@@ -712,9 +712,9 @@ export const HomePage: React.FC<HomePageProps> = ({ navigate }) => {
           course={selectedCourseForBkash}
           isOpen={!!selectedCourseForBkash}
           onClose={() => setSelectedCourseForBkash(null)}
+          navigate={navigate}
           onPaymentSubmitted={() => {
             setSelectedCourseForBkash(null);
-            navigate('/payments');
           }}
         />
       )}

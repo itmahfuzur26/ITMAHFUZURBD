@@ -1166,6 +1166,92 @@ app.post('/api/payments/submit-bkash', authenticateToken, (req: Request, res: Re
   });
 });
 
+// Automated bKash Payment & Instant Course Unlock
+app.post('/api/payments/bkash-auto', authenticateToken, (req: Request, res: Response): void => {
+  const { course_id, bkash_sender_number } = req.body;
+  const userId = req.user!.id;
+  const userEmail = req.user!.email;
+  const userName = req.user!.name;
+
+  if (!course_id || !bkash_sender_number) {
+    res.status(400).json({ error: 'Course ID and bKash number are required' });
+    return;
+  }
+
+  const db = getDb();
+  const course = db.courses.find(c => c.id === course_id);
+  if (!course) {
+    res.status(404).json({ error: 'Course not found' });
+    return;
+  }
+
+  // Generate unique bKash Auto Transaction ID
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let rand = '';
+  for (let i = 0; i < 4; i++) {
+    rand += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  const autoTrxId = `BK${rand}${Date.now().toString().slice(-6)}`;
+  const cleanPhone = bkash_sender_number.toString().trim();
+
+  // Instant Active Enrollment
+  let enrollment = db.enrollments.find(e => e.user_id === userId && e.course_id === course_id);
+  if (enrollment) {
+    enrollment.status = 'active';
+  } else {
+    enrollment = {
+      id: 'enr_' + Date.now(),
+      user_id: userId,
+      course_id: course.id,
+      enrolled_at: new Date().toISOString(),
+      status: 'active',
+    };
+    db.enrollments.push(enrollment);
+  }
+
+  // Save Payment Record as approved
+  const paymentRecord: PaymentRequest = {
+    id: 'pay_auto_' + Date.now(),
+    user_id: userId,
+    user_email: userEmail,
+    user_name: userName,
+    course_id: course.id,
+    course_title_bn: course.title_bn,
+    course_title_en: course.title_en,
+    amount: course.price,
+    bkash_sender_number: cleanPhone,
+    transaction_id: autoTrxId,
+    status: 'approved',
+    created_at: new Date().toISOString(),
+    reviewed_at: new Date().toISOString(),
+  };
+  db.payments.push(paymentRecord);
+
+  // Send Notification to student
+  db.notifications.push({
+    id: 'notif_' + Date.now(),
+    user_id: userId,
+    title_bn: `অভিনন্দন! "${course.title_bn}" কোর্সটি আনলক হয়েছে`,
+    title_en: `Congratulations! "${course.title_en}" is now unlocked`,
+    message_bn: `আপনার বিকাশ অটো পেমেন্ট সফল হয়েছে (TrxID: ${autoTrxId})। আপনি এখনই ক্লাস শুরু করতে পারেন।`,
+    message_en: `Your bKash auto payment was successful (TrxID: ${autoTrxId}). You can start watching lessons now.`,
+    read: false,
+    link: `/courses/${course.id}`,
+    created_at: new Date().toISOString(),
+  });
+
+  saveDb(db);
+
+  res.json({
+    success: true,
+    message: 'bKash Auto Payment successful! Course unlocked instantly.',
+    transaction_id: autoTrxId,
+    course_id: course.id,
+    course_title_bn: course.title_bn,
+    redirect_url: `/courses/${course.id}`,
+  });
+});
+
 // Student's payment history
 app.get('/api/student/payments', authenticateToken, (req: Request, res: Response): void => {
   const userId = req.user!.id;
