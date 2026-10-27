@@ -244,6 +244,33 @@ function ensureDbFile(): DatabaseSchema {
           inMemoryDb.settings.tagline_en = 'ITMahfuzur — Technology Education Built on Experience, Your Partner in Skill Development.';
         }
       }
+
+      // Guarantee admin user itmahfuzur@gmail.com exists with admin role
+      if (inMemoryDb) {
+        if (!Array.isArray(inMemoryDb.users)) {
+          inMemoryDb.users = [];
+        }
+        let admin = inMemoryDb.users.find(u => u.email.toLowerCase() === 'itmahfuzur@gmail.com');
+        if (!admin) {
+          admin = {
+            id: 'user_admin_mahdi',
+            name: 'Mahfuzur Rahman Mahdi',
+            email: 'itmahfuzur@gmail.com',
+            passwordHash: bcrypt.hashSync('Password@123', 10),
+            role: 'admin',
+            phone: '01762-766261',
+            bio: 'আইটি ট্রেইনার ও ফাউন্ডার - ITMahfuzur। গ্রাফিক ডিজাইন, এআই ও ডিজিটাল স্কিলস বিশেষজ্ঞ (২০১৮ থেকে)।',
+            createdAt: new Date().toISOString(),
+          };
+          inMemoryDb.users.unshift(admin);
+        } else {
+          admin.role = 'admin';
+          if (!admin.passwordHash || !admin.passwordHash.startsWith('$2')) {
+            admin.passwordHash = bcrypt.hashSync('Password@123', 10);
+          }
+        }
+      }
+
       return inMemoryDb!;
     } catch (err) {
       console.error('Error reading DB, re-initializing seeds', err);

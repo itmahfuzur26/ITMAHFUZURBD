@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
-import { Settings, User, Mail, Phone, Key, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Settings, User, Mail, Phone, Key, CheckCircle2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 export const AccountSettingsPage: React.FC = () => {
   const { language, t } = useLanguage();
@@ -12,6 +12,7 @@ export const AccountSettingsPage: React.FC = () => {
   const [bio, setBio] = useState(user?.bio || '');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -140,29 +141,53 @@ export const AccountSettingsPage: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    {language === 'bn' ? 'বর্তমান পাসওয়ার্ড' : 'Current Password'}
-                  </label>
-                  <input
-                    type="password"
-                    placeholder="••••••••"
-                    value={currentPassword}
-                    onChange={e => setCurrentPassword(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:border-cyan-500 focus:outline-none"
-                  />
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-semibold text-slate-300">
+                      {language === 'bn' ? 'বর্তমান পাসওয়ার্ড' : 'Current Password'}
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="text-[11px] text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1"
+                    >
+                      {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      <span>{showPassword ? (language === 'bn' ? 'লুকান' : 'Hide') : (language === 'bn' ? 'দেখুন' : 'Show')}</span>
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="••••••••"
+                      value={currentPassword}
+                      onChange={e => setCurrentPassword(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:border-cyan-500 focus:outline-none"
+                    />
+                  </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    {language === 'bn' ? 'নতুন পাসওয়ার্ড' : 'New Password'}
-                  </label>
-                  <input
-                    type="password"
-                    placeholder="••••••••"
-                    value={newPassword}
-                    onChange={e => setNewPassword(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:border-cyan-500 focus:outline-none"
-                  />
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-semibold text-slate-300">
+                      {language === 'bn' ? 'নতুন পাসওয়ার্ড' : 'New Password'}
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="text-[11px] text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1"
+                    >
+                      {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      <span>{showPassword ? (language === 'bn' ? 'লুকান' : 'Hide') : (language === 'bn' ? 'দেখুন' : 'Show')}</span>
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="••••••••"
+                      value={newPassword}
+                      onChange={e => setNewPassword(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:border-cyan-500 focus:outline-none"
+                    />
+                  </div>
                 </div>
               </div>
             </div>

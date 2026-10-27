@@ -77,8 +77,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(data.token);
       setUser(data.user);
       return { success: true };
-    } catch {
-      return { success: false, error: 'Network or server error' };
+    } catch (err: any) {
+      console.error('Login request failed:', err);
+      return { success: false, error: 'সার্ভারের সাথে সংযোগ করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন বা অন্য ব্রাউজারে রিলোড দিন।' };
     }
   };
 
