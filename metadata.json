@@ -1,0 +1,6 @@
+{
+  "name": "ITMahfuzur",
+  "description": "ITMahfuzur - প্রযুক্তি শিক্ষা ও দক্ষতা উন্নয়ন প্ল্যাটফর্ম। Practical technology training, AI, graphic design, and digital skills education by Mahfuzur Rahman Mahdi.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
