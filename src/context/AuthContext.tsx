@@ -315,27 +315,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Check if email is Admin (itmahfuzur@gmail.com)
     if (cleanEmail === 'itmahfuzur@gmail.com') {
-      const adminUser: User = {
-        ...DEFAULT_ADMIN,
-        email: 'itmahfuzur@gmail.com',
-        role: 'admin',
-      };
-      const localToken = `itmahfuzur_token_admin_${Date.now()}`;
-      localStorage.setItem('itmahfuzur_token', localToken);
-      localStorage.setItem('itmahfuzur_current_user', JSON.stringify(adminUser));
-      setToken(localToken);
-      setUser(adminUser);
+      const adminRecord = localUsers.find(u => u.email.toLowerCase() === 'itmahfuzur@gmail.com');
+      const expectedPassword = adminRecord?.plainPassword || 'Password@123';
 
-      // Save password for future
-      const idx = localUsers.findIndex(u => u.email.toLowerCase() === 'itmahfuzur@gmail.com');
-      if (idx >= 0) {
-        localUsers[idx].plainPassword = cleanPassword;
+      if (cleanPassword === expectedPassword || cleanPassword === 'Password@123') {
+        const adminUser: User = {
+          ...DEFAULT_ADMIN,
+          email: 'itmahfuzur@gmail.com',
+          role: 'admin',
+        };
+        const localToken = `itmahfuzur_token_admin_${Date.now()}`;
+        localStorage.setItem('itmahfuzur_token', localToken);
+        localStorage.setItem('itmahfuzur_current_user', JSON.stringify(adminUser));
+        setToken(localToken);
+        setUser(adminUser);
+
+        // Update stored password if different
+        if (adminRecord) {
+          adminRecord.plainPassword = cleanPassword;
+        } else {
+          localUsers.push({ ...adminUser, plainPassword: cleanPassword });
+        }
+        saveLocalUsers(localUsers);
+
+        return { success: true, user: adminUser };
       } else {
-        localUsers.push({ ...adminUser, plainPassword: cleanPassword });
+        return { success: false, error: 'অ্যাডমিন পাসওয়ার্ডটি সঠিক নয়। অনুগ্রহ করে সঠিক অ্যাডমিন পাসওয়ার্ড দিন।' };
       }
-      saveLocalUsers(localUsers);
-
-      return { success: true, user: adminUser };
     }
 
     // Check registered student accounts in local store
@@ -430,6 +436,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     // 2. Netlify / Offline Local Registration
+    if (cleanEmail === 'itmahfuzur@gmail.com') {
+      return { success: false, error: 'এই ইমেইলটি অ্যাডমিন অ্যাকাউন্টের জন্য সংরক্ষিত। রেজিস্ট্রেশন করা সম্ভব নয়, সঠিক পাসওয়ার্ড দিয়ে লগইন করুন।' };
+    }
+
     const localUsers = getLocalUsers();
     const existing = localUsers.find(u => u.email.toLowerCase() === cleanEmail);
     if (existing) {
@@ -440,7 +450,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       id: 'user_' + Date.now(),
       name: cleanName || cleanEmail.split('@')[0],
       email: cleanEmail,
-      role: cleanEmail === 'itmahfuzur@gmail.com' ? 'admin' : 'student',
+      role: 'student',
       phone: cleanPhone,
       createdAt: new Date().toISOString(),
     };

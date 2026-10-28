@@ -121,6 +121,56 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ navigate
   const [bundleSaving, setBundleSaving] = useState(false);
   const [bundleSaved, setBundleSaved] = useState(false);
 
+  // Admin Password Change State
+  const [adminCurrentPassword, setAdminCurrentPassword] = useState('');
+  const [adminNewPassword, setAdminNewPassword] = useState('');
+  const [adminConfirmPassword, setAdminConfirmPassword] = useState('');
+  const [adminPasswordSaving, setAdminPasswordSaving] = useState(false);
+  const [adminPasswordMessage, setAdminPasswordMessage] = useState<string | null>(null);
+  const [adminPasswordError, setAdminPasswordError] = useState<string | null>(null);
+
+  const handleAdminPasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAdminPasswordError(null);
+    setAdminPasswordMessage(null);
+
+    if (adminNewPassword !== adminConfirmPassword) {
+      setAdminPasswordError('নতুন পাসওয়ার্ড এবং নিশ্চিতকরণ পাসওয়ার্ড মেলেনি।');
+      return;
+    }
+
+    if (adminNewPassword.length < 6) {
+      setAdminPasswordError('পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।');
+      return;
+    }
+
+    setAdminPasswordSaving(true);
+    try {
+      const res = await fetchWithAuth('/api/admin/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentPassword: adminCurrentPassword,
+          newPassword: adminNewPassword,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setAdminPasswordMessage(data.message || 'পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!');
+        setAdminCurrentPassword('');
+        setAdminNewPassword('');
+        setAdminConfirmPassword('');
+      } else {
+        setAdminPasswordError(data.error || 'পাসওয়ার্ড পরিবর্তন ব্যর্থ হয়েছে।');
+      }
+    } catch {
+      setAdminPasswordError('পাসওয়ার্ড পরিবর্তনে সমস্যা হয়েছে।');
+    } finally {
+      setAdminPasswordSaving(false);
+    }
+  };
+
   useEffect(() => {
     if (!isAdmin) {
       navigate('/login');
@@ -1126,6 +1176,95 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ navigate
                     onChange={e => setSiteSettings({ ...siteSettings, bundle_title_en: e.target.value })}
                     className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:border-cyan-500 focus:outline-none"
                   />
+                </div>
+              </div>
+            </div>
+
+            {/* Section G: Admin Security & Password Change */}
+            <div className="space-y-4 pt-4 border-t border-slate-800">
+              <h3 className="text-sm font-bold text-amber-400 flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 text-amber-400" />
+                <span>৭. অ্যাডমিন পাসওয়ার্ড পরিবর্তন ও নিরাপত্তা (Admin Account & Security)</span>
+              </h3>
+
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs space-y-2 leading-relaxed">
+                <p className="font-bold text-amber-300">
+                  নিরাপদভাবে পাসওয়ার্ড সেট করার গোপনীয় নির্দেশিকা:
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-slate-300 text-[11px]">
+                  <li>অ্যাডমিন ইমেইল: <code className="text-amber-300 font-mono">itmahfuzur@gmail.com</code> (শুধুমাত্র আপনার একাউন্টের জন্য সংরক্ষিত)।</li>
+                  <li>নতুন পাসওয়ার্ডটিতে অন্তত ৬-১২ টি অক্ষর, বড় হাত/ছোট হাতের বর্ণ এবং সংখ্যা ব্যবহার করুন।</li>
+                  <li>পাসওয়ার্ডটি কাউকে শেয়ার করবেন না এবং কোনো কোডে সরাসরি রাখবেন না।</li>
+                </ul>
+              </div>
+
+              {adminPasswordError && (
+                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  <span>{adminPasswordError}</span>
+                </div>
+              )}
+
+              {adminPasswordMessage && (
+                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <span>{adminPasswordMessage}</span>
+                </div>
+              )}
+
+              <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">
+                      বর্তমান পাসওয়ার্ড
+                    </label>
+                    <input
+                      type="password"
+                      placeholder="••••••••"
+                      value={adminCurrentPassword}
+                      onChange={e => setAdminCurrentPassword(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-amber-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">
+                      নতুন গোপনীয় পাসওয়ার্ড *
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      placeholder="কমপক্ষে ৬ অক্ষর"
+                      value={adminNewPassword}
+                      onChange={e => setAdminNewPassword(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-amber-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">
+                      নতুন পাসওয়ার্ড নিশ্চিতকরণ *
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      placeholder="পাসওয়ার্ড পুনরায় লিখুন"
+                      value={adminConfirmPassword}
+                      onChange={e => setAdminConfirmPassword(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-amber-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleAdminPasswordChange}
+                    disabled={adminPasswordSaving || !adminNewPassword}
+                    className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20 transition cursor-pointer disabled:opacity-50"
+                  >
+                    {adminPasswordSaving ? 'পাসওয়ার্ড সেভ হচ্ছে...' : '🔒 পাসওয়ার্ড আপডেট ও সেভ করুন'}
+                  </button>
                 </div>
               </div>
             </div>

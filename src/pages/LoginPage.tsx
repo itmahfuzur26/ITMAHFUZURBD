@@ -43,40 +43,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ navigate }) => {
     }
   };
 
-  // Quick One-Click Login for Admin
-  const handleQuickAdminLogin = async () => {
-    setEmail('itmahfuzur@gmail.com');
-    setPassword('Password@123');
-    setLoading(true);
-    setError(null);
-
-    const result = await login('itmahfuzur@gmail.com', 'Password@123');
-    setLoading(false);
-
-    if (result.success) {
-      navigate('/admin');
-    } else {
-      setError(result.error || 'Admin login failed');
-    }
-  };
-
-  // Quick One-Click Login for Student Demo
-  const handleQuickStudentLogin = async () => {
-    setEmail('student@itmahfuzur.com');
-    setPassword('Password@123');
-    setLoading(true);
-    setError(null);
-
-    const result = await login('student@itmahfuzur.com', 'Password@123');
-    setLoading(false);
-
-    if (result.success) {
-      navigate('/dashboard');
-    } else {
-      setError(result.error || 'Student login failed');
-    }
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6">
       <div className="w-full max-w-md space-y-6">
@@ -190,37 +156,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ navigate }) => {
               <span>{loading ? (language === 'bn' ? 'লগইন হচ্ছে...' : 'Signing in...') : t('navLogin')}</span>
             </button>
           </form>
-
-          {/* Quick Login Options */}
-          <div className="pt-2 border-t border-slate-800 space-y-2.5">
-            <p className="text-[11px] font-bold text-slate-400 text-center uppercase tracking-wider">
-              {language === 'bn' ? 'সহজে দ্রুত প্রবেশের অপশন' : 'Fast 1-Click Access Options'}
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={handleQuickAdminLogin}
-                disabled={loading}
-                className="py-2.5 px-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
-                title="Login directly as Mahfuzur Rahman Mahdi"
-              >
-                <Zap className="w-3.5 h-3.5 text-amber-400" />
-                <span>{language === 'bn' ? '👑 এডমিন সরাসরি লগইন' : '👑 Admin 1-Click'}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleQuickStudentLogin}
-                disabled={loading}
-                className="py-2.5 px-3 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
-                title="Login directly with demo student account"
-              >
-                <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
-                <span>{language === 'bn' ? '🎓 শিক্ষার্থী ডেমো লগইন' : '🎓 Student Demo'}</span>
-              </button>
-            </div>
-          </div>
 
           {/* Registration Link */}
           <div className="text-center text-xs text-slate-400 pt-3 border-t border-slate-800">

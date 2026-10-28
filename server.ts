@@ -127,6 +127,11 @@ app.post('/api/auth/register', (req: Request, res: Response): void => {
     const db = getDb();
     const normalizedEmail = email.toLowerCase().trim();
 
+    if (normalizedEmail === 'itmahfuzur@gmail.com') {
+      res.status(400).json({ error: 'এই ইমেইলটি অ্যাডমিন অ্যাকাউন্টের জন্য সংরক্ষিত। অনুগ্রহ করে সঠিক পাসওয়ার্ড দিয়ে লগইন করুন।' });
+      return;
+    }
+
     if (db.users.some(u => u.email.toLowerCase() === normalizedEmail)) {
       res.status(400).json({ error: 'এই ইমেইল দিয়ে ইতিমধ্যে অ্যাকাউন্ট তৈরি করা আছে। অনুগ্রহ করে লগইন করুন।' });
       return;
@@ -138,7 +143,7 @@ app.post('/api/auth/register', (req: Request, res: Response): void => {
       name: name.trim(),
       email: normalizedEmail,
       passwordHash,
-      role: normalizedEmail === 'itmahfuzur@gmail.com' ? 'admin' : 'student',
+      role: 'student',
       phone: phone ? phone.trim() : undefined,
       createdAt: new Date().toISOString(),
     };
@@ -212,14 +217,6 @@ app.post('/api/auth/login', (req: Request, res: Response): void => {
     } catch (bcryptErr) {
       console.error('Password comparison warning:', bcryptErr);
       isMatch = user.passwordHash === String(password);
-    }
-
-    // Safeguard for founder & instructor (Mahfuzur Rahman Mahdi)
-    if (!isMatch && normalizedEmail === 'itmahfuzur@gmail.com' && (password === 'Password@123' || password === 'admin123' || password === '01762766261')) {
-      isMatch = true;
-      user.passwordHash = bcrypt.hashSync(String(password), 10);
-      user.role = 'admin';
-      saveDb(db);
     }
 
     if (!isMatch) {
@@ -374,6 +371,44 @@ app.post('/api/auth/forgot-password', (req: Request, res: Response): void => {
   } catch (err: any) {
     console.error('Forgot password error:', err);
     res.status(500).json({ error: 'পাসওয়ার্ড রিসেটে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।' });
+  }
+});
+
+// Admin Dedicated Change Password Endpoint
+app.post('/api/admin/change-password', authenticateToken, requireAdmin, (req: Request, res: Response): void => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!newPassword || String(newPassword).trim().length < 6) {
+      res.status(400).json({ error: 'কমপক্ষে ৬ অক্ষরের নতুন পাসওয়ার্ড প্রদান করুন।' });
+      return;
+    }
+
+    const db = getDb();
+    const admin = db.users.find(u => u.id === req.user?.id && u.role === 'admin');
+    if (!admin) {
+      res.status(404).json({ error: 'অ্যাডমিন অ্যাকাউন্ট পাওয়া যায়নি।' });
+      return;
+    }
+
+    if (currentPassword && admin.passwordHash && admin.passwordHash.startsWith('$2')) {
+      const isMatch = bcrypt.compareSync(String(currentPassword), admin.passwordHash);
+      if (!isMatch) {
+        res.status(400).json({ error: 'বর্তমান পাসওয়ার্ডটি সঠিক নয়।' });
+        return;
+      }
+    }
+
+    const newHash = bcrypt.hashSync(String(newPassword).trim(), 10);
+    admin.passwordHash = newHash;
+    saveDb(db);
+
+    res.json({
+      success: true,
+      message: 'অ্যাডমিন পাসওয়ার্ড সফলভাবে সংরক্ষিত ও আপডেট হয়েছে।'
+    });
+  } catch (err: any) {
+    console.error('Admin password change error:', err);
+    res.status(500).json({ error: 'পাসওয়ার্ড পরিবর্তনে সমস্যা হয়েছে।' });
   }
 });
 

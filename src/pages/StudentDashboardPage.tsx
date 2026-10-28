@@ -151,7 +151,7 @@ export const StudentDashboardPage: React.FC<StudentDashboardPageProps> = ({ navi
               className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold transition flex items-center gap-1.5"
             >
               <BookOpen className="w-3.5 h-3.5" />
-              <span>{language === 'bn' ? '+ নতুন কোর্স যোগ করুন' : '+ Explore More'}</span>
+              <span>{language === 'bn' ? 'সকল কোর্স দেখুন' : 'Browse Courses'}</span>
             </button>
           </div>
         </div>
